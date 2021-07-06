@@ -1,2 +1,8 @@
+[web_servers]
 jakuna@192.168.158.137
+
+[db_servers]
+jakuntu@192.168.158.138
+
+[file_servers]
 jakuntu@192.168.158.138
