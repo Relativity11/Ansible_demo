@@ -40,6 +40,14 @@
        state: latest
      when: ansible_distribution == "Ubuntu"
 
+   - name: start httpd (Fedora)
+     tags: apache,fedora,httpd
+     service:
+       name: httpd
+       state: started
+       enabled: yes
+     when: ansible_distribution == "Fedora"
+
    - name: copy default html file for site
      tags: apache,Apache2,httpd
      copy:
