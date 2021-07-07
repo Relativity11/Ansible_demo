@@ -7,16 +7,26 @@
    - name: install updates (Fedora)
      tags: always
      dnf:
-       update_only: yes
        update_cache: yes
+     changed_when: false
      when: ansible_distribution == "Fedora"
 
    - name: install updates (Ubuntu)
      tags: always
      apt:
-       upgrade: dist
        update_cache: yes
+     changed_when: false
      when: ansible_distribution == "Ubuntu"
+
+ - hosts: all
+   become: true
+   tasks:
+
+   - name: add ssh key for Testuser
+     tags: always
+     authorized_key:
+       user: testuser
+       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHU0/hMwyLJF+pemGu/llid9hSUkhWsrzbIXAwl1ImdS Ansible Demo Key"
 
  - hosts: web_servers
    become: true
@@ -31,6 +41,30 @@
        state: latest
      when: ansible_distribution == "Fedora"
 
+   - name: start httpd (Fedora)
+     tags: apache,fedora,httpd
+     service:
+       name: httpd
+       state: started
+       enabled: yes
+     when: ansible_distribution == "Fedora"
+
+   - name: change e-mail address for admin
+     tags: apache,fedora,httpd
+     lineinfile:
+       path: /etc/httpd/conf/httpd.conf
+       regexp: '^ServerAdmin'
+       line: ServerAdmin somebody@somewhere.net
+     when: ansible_distribution == "Fedora"
+     register: httpd
+
+   - name: restart httpd (Fedora)
+     tags: apache,Fedora,httpd
+     service:
+       name: httpd
+       state: restarted
+     when: httpd.changed
+
    - name: install apache package (ubuntu)
      tags: apache,apache2,ubuntu
      apt:
@@ -39,14 +73,6 @@
          - libapache2-mod-php
        state: latest
      when: ansible_distribution == "Ubuntu"
-
-   - name: start httpd (Fedora)
-     tags: apache,fedora,httpd
-     service:
-       name: httpd
-       state: started
-       enabled: yes
-     when: ansible_distribution == "Fedora"
 
    - name: copy default html file for site
      tags: apache,Apache2,httpd
