@@ -1,0 +1,40 @@
+---
+
+ - hosts: all
+   become: true
+   pre_tasks:
+
+   - name: install updates (Fedora)
+     tags: always
+     dnf:
+       update_only: yes
+       update_cache: yes
+     when: ansible_distribution == "Fedora"
+
+   - name: install updates (Ubuntu)
+     tags: always
+     apt:
+       upgrade: dist
+       update_cache: yes
+     when: ansible_distribution == "Ubuntu"
+
+ - hosts: all
+   become: true
+   tasks:
+ 
+   - name: create TestUser user
+     user:
+       name: testuser
+       groups: root
+
+   - name: add ssh key for TestUser
+     authorized_key:
+       user: testuser
+       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHU0/hMwyLJF+pemGu/llid9hSUkhWsrzbIXAwl1ImdS Ansible Demo Key"
+
+   - name: add sudoers file for TestUser
+     copy:
+       src: sudoer_testuser
+       dest: /etc/sudoers.d/testuser
+       owner: root
+       group: root
